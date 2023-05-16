@@ -17,6 +17,7 @@ public class Main {
 
         }
 
+
         for (int i = 0; i < L; i++) {
             String[] line = br.readLine().split(" ");
             int p = Integer.parseInt(line[0]);
