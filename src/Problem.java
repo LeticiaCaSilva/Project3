@@ -27,11 +27,13 @@ public class Problem {
 
 
     private List<Edge>[] buildNetwork() {
-        List<Edge>[] finalGraph = new List<>[(numNodes*2)+1];
+        List<Edge>[] finalGraph = new List[(numNodes*2)+1];
         finalGraph[0] = new LinkedList<>();
         for (int i = 1; i < numNodes; i++) {
-            if (i == safe)
+            if (i == safe){
+                finalGraph[i] = new LinkedList<>();
                 continue;
+            }
             if (finalGraph[i+numNodes] == null)
                 finalGraph[i+numNodes] = new LinkedList<>();
             if (finalGraph[i] == null)
@@ -42,6 +44,7 @@ public class Problem {
 
         for (int i = 0; i < edges.size(); i++) {
             Pair p = edges.get(0);
+            System.out.println(p.getY());
             finalGraph[p.getX()+numNodes].add(new Edge(p.getY(), Integer.MAX_VALUE));
             finalGraph[p.getY()].add(new Edge(p.getX()+numNodes, 0));
         }
@@ -50,11 +53,6 @@ public class Problem {
 
     private int edmondsKarp(List<Edge>[] network, int numNodes, int source, int sink) {
         int[][] flow = new int[numNodes][numNodes];
-        for (int i = 0; i < network.length; i++) {
-            for (Edge e : network[i]) {
-                flow[i][e.getDestination()] = 0;
-            }
-        }
         int[] via = new int[numNodes];
         int flowValue = 0;
         int increment;
