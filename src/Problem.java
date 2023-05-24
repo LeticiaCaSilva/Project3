@@ -18,35 +18,33 @@ public class Problem {
         this.safe = safe;
     }
 
-    // o valor de graph[x*2][y*2] é o
+
     public int solve() {
         List<Edge>[] finalGraph = buildNetwork();
-        return edmondsKarp(finalGraph, numNodes, 0, safe);
+        return edmondsKarp(finalGraph, (numNodes*2) + 1, 0, safe);
     }
 
-
-
+    @SuppressWarnings("unchecked")
     private List<Edge>[] buildNetwork() {
         List<Edge>[] finalGraph = new List[(numNodes*2)+1];
         finalGraph[0] = new LinkedList<>();
-        for (int i = 1; i < numNodes; i++) {
-            if (i == safe){
-                finalGraph[i] = new LinkedList<>();
-                continue;
-            }
+        for (int i = 1; i <= numNodes; i++) {
             if (finalGraph[i+numNodes] == null)
                 finalGraph[i+numNodes] = new LinkedList<>();
             if (finalGraph[i] == null)
                 finalGraph[i] = new LinkedList<>();
             finalGraph[0].add(new Edge(i, populations[i]));
+            finalGraph[i].add(new Edge(0, 0));
+
             finalGraph[i].add(new Edge(i+numNodes, departureCapacities[i]));
+            finalGraph[i+numNodes].add(new Edge(i, 0));
         }
 
-        for (int i = 0; i < edges.size(); i++) {
-            Pair p = edges.get(0);
-            System.out.println(p.getY());
-            finalGraph[p.getX()+numNodes].add(new Edge(p.getY(), Integer.MAX_VALUE));
-            finalGraph[p.getY()].add(new Edge(p.getX()+numNodes, 0));
+        for (Pair p : edges) {
+            finalGraph[p.getX() + numNodes].add(new Edge(p.getY(), Integer.MAX_VALUE));
+            finalGraph[p.getY()].add(new Edge(p.getX() + numNodes, 0));
+            finalGraph[p.getY() + numNodes].add(new Edge(p.getX(), Integer.MAX_VALUE));
+            finalGraph[p.getX()].add(new Edge(p.getY() + numNodes, 0));
         }
         return finalGraph;
     }
@@ -67,39 +65,35 @@ public class Problem {
                 node = origin;
             }
         }
-    return flowValue;
-}
+        return flowValue;
+    }
 
     private int findPath(List<Edge>[] network, int numNodes, int[][] flow, int source, int sink, int[] via) {
-            Queue<Integer> waiting = new LinkedList<>();
-            boolean[] found = new boolean[numNodes];
-            for (int i = 0; i < numNodes; i++) {
-                found[i] = false;
-            }
-            int[] pathIncr = new int[numNodes];
-            waiting.add(source);
-            found[source] = true;
-            via[source] = source;
-            pathIncr[source] = Integer.MAX_VALUE;
+        Queue<Integer> waiting = new LinkedList<>();
+        boolean[] found = new boolean[numNodes];
+        int[] pathIncr = new int[numNodes];
+        waiting.add(source);
+        found[source] = true;
+        via[source] = source;
+        pathIncr[source] = Integer.MAX_VALUE;
 
-            do {
-                int origin = waiting.remove();
-                for (int i = 0; i < network.length; i++) {
-                    for (Edge e : network[i]) {
-                        int destin = e.getDestination();
-                        int residue = e.getCost() - flow[i][e.getDestination()];
-                        if (!found[destin] && residue > 0) {
-                            via[destin] = origin;
-                            pathIncr[destin] = Math.min(pathIncr[origin], residue);
-                            if (destin == sink)
-                                return pathIncr[destin];
-                            waiting.add(destin);
-                            found[destin] = true;
-                        }
-                    }
+        do {
+            int origin = waiting.remove();
+            for (Edge e : network[origin]) {
+                int destin = e.getDestination();
+                int residue = e.getCost() - flow[origin][e.getDestination()];
+                if (!found[destin] && residue > 0) {
+                    via[destin] = origin;
+                    pathIncr[destin] = Math.min(pathIncr[origin], residue);
+                    if (destin == sink) {
+                        return pathIncr[destin];}
+                    waiting.add(destin);
+                    found[destin] = true;
                 }
-            } while ( !waiting.isEmpty() );
-            return 0;
+            }
+        } while ( !waiting.isEmpty() );
+        return 0;
     }
-}
 
+
+}
