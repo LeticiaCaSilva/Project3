@@ -21,7 +21,7 @@ public class Problem {
     // o valor de graph[x*2][y*2] é o
     public int solve() {
         List<Edge>[] finalGraph = buildNetwork();
-        return edmondsKarp(finalGraph, numNodes, 0, safe);
+        return edmondsKarp(finalGraph, (numNodes*2) + 1, 0, safe);
     }
 
 
@@ -29,22 +29,26 @@ public class Problem {
     private List<Edge>[] buildNetwork() {
         List<Edge>[] finalGraph = new List[(numNodes*2)+1];
         finalGraph[0] = new LinkedList<>();
-        for (int i = 1; i < numNodes; i++) {
-            if (i == safe){
-                finalGraph[i] = new LinkedList<>();
-                continue;
-            }
+        for (int i = 1; i <= numNodes; i++) {
+            //if (i == safe){
+            //    finalGraph[i] = new LinkedList<>();
+            //    finalGraph[i+numNodes] = new LinkedList<>();
+            //    continue;
+            //}
             if (finalGraph[i+numNodes] == null)
                 finalGraph[i+numNodes] = new LinkedList<>();
             if (finalGraph[i] == null)
                 finalGraph[i] = new LinkedList<>();
             finalGraph[0].add(new Edge(i, populations[i]));
+            finalGraph[i].add(new Edge(0, 0));
+
             finalGraph[i].add(new Edge(i+numNodes, departureCapacities[i]));
+            finalGraph[i+numNodes].add(new Edge(i, 0));
         }
 
         for (int i = 0; i < edges.size(); i++) {
-            Pair p = edges.get(0);
-            System.out.println(p.getY());
+            Pair p = edges.get(i);
+            System.out.println(p.getX() + " " + p.getY());
             finalGraph[p.getX()+numNodes].add(new Edge(p.getY(), Integer.MAX_VALUE));
             finalGraph[p.getY()].add(new Edge(p.getX()+numNodes, 0));
         }
@@ -52,11 +56,13 @@ public class Problem {
     }
 
     private int edmondsKarp(List<Edge>[] network, int numNodes, int source, int sink) {
+        //System.out.println("what");
         int[][] flow = new int[numNodes][numNodes];
         int[] via = new int[numNodes];
         int flowValue = 0;
         int increment;
         while ( ( increment = findPath(network, numNodes, flow, source, sink, via) ) != 0 ) {
+            //System.out.println(increment);
             flowValue += increment;
             // Update flow.
             int node = sink;
@@ -73,9 +79,6 @@ public class Problem {
     private int findPath(List<Edge>[] network, int numNodes, int[][] flow, int source, int sink, int[] via) {
             Queue<Integer> waiting = new LinkedList<>();
             boolean[] found = new boolean[numNodes];
-            for (int i = 0; i < numNodes; i++) {
-                found[i] = false;
-            }
             int[] pathIncr = new int[numNodes];
             waiting.add(source);
             found[source] = true;
@@ -84,20 +87,19 @@ public class Problem {
 
             do {
                 int origin = waiting.remove();
-                for (int i = 0; i < network.length; i++) {
-                    for (Edge e : network[i]) {
+                for (Edge e : network[origin]) {
+                        //System.out.println(i + "   " + e.getDestination() + " cost -> " + e.getCost());
                         int destin = e.getDestination();
-                        int residue = e.getCost() - flow[i][e.getDestination()];
+                        int residue = e.getCost() - flow[origin][e.getDestination()];
                         if (!found[destin] && residue > 0) {
                             via[destin] = origin;
                             pathIncr[destin] = Math.min(pathIncr[origin], residue);
-                            if (destin == sink)
-                                return pathIncr[destin];
+                            if (destin == sink) {
+                                 return pathIncr[destin];}
                             waiting.add(destin);
                             found[destin] = true;
                         }
                     }
-                }
             } while ( !waiting.isEmpty() );
             return 0;
     }

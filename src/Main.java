@@ -11,12 +11,12 @@ public class Main {
     int R = Integer.parseInt(firstLine[0]);
     int L = Integer.parseInt(firstLine[1]);
     List<Pair> edges = new ArrayList<>();
-    int [] departureCapacities = new int[R];
-    int [] populations = new int[R];
+    int [] departureCapacities = new int[R+1];
+    int [] populations = new int[R+1];
         for (int i = 0; i < R; i++) {
             String[] line = br.readLine().split(" ");
-            populations[i] = Integer.parseInt(line[0]);
-            departureCapacities[i] = Integer.parseInt(line[1]);
+            populations[i+1] = Integer.parseInt(line[0]);
+            departureCapacities[i+1] = Integer.parseInt(line[1]);
         }
         for (int i = 0; i < L; i++) {
             String[] line = br.readLine().split(" ");
