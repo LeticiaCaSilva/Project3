@@ -6,21 +6,22 @@ import java.util.List;
 
 public class Main {
 
+    private static final String DELIMITER = " ";
     public static void main(String[] args) throws IOException {
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-    String[] firstLine = br.readLine().split(" ");
+    String[] firstLine = br.readLine().split(DELIMITER);
     int R = Integer.parseInt(firstLine[0]);
     int L = Integer.parseInt(firstLine[1]);
-    List<Pair> edges = new ArrayList<>();
+    List<Pair> edges = new ArrayList<>(L);
     int [] departureCapacities = new int[R+1];
     int [] populations = new int[R+1];
         for (int i = 1; i <= R; i++) {
-            String[] line = br.readLine().split(" ");
+            String[] line = br.readLine().split(DELIMITER);
             populations[i] = Integer.parseInt(line[0]);
             departureCapacities[i] = Integer.parseInt(line[1]);
         }
         for (int i = 0; i < L; i++) {
-            String[] line = br.readLine().split(" ");
+            String[] line = br.readLine().split(DELIMITER);
             int o = Integer.parseInt(line[0]);
             int d = Integer.parseInt(line[1]);
             edges.add(new Pair(o,d));

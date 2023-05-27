@@ -18,43 +18,50 @@ public class Problem {
         this.safe = safe;
     }
 
-
+    /**
+     * Solves the problem of finding the maximum amount of
+     * population that can end up in the safe region.
+     * @return the maximum amount of population that can end up in the safe region
+     */
     public int solve() {
         List<Edge>[] finalGraph = buildNetwork();
-        return edmondsKarp(finalGraph, (numNodes*2) + 1, 0, safe);
+        return edmondsKarp(finalGraph, 0, safe);
     }
 
+    /*
+     * Builds the graph to solve the problem
+     */
     @SuppressWarnings("unchecked")
     private List<Edge>[] buildNetwork() {
         List<Edge>[] finalGraph = new List[(numNodes*2)+1];
         finalGraph[0] = new LinkedList<>();
         for (int i = 1; i <= numNodes; i++) {
-            if (finalGraph[i+numNodes] == null)
-                finalGraph[i+numNodes] = new LinkedList<>();
-            if (finalGraph[i] == null)
-                finalGraph[i] = new LinkedList<>();
+            finalGraph[i+numNodes] = new LinkedList<>();
+            finalGraph[i] = new LinkedList<>();
             finalGraph[0].add(new Edge(i, populations[i]));
-            finalGraph[i].add(new Edge(0, 0));
-
+            finalGraph[i].add(new Edge(0, 0)); // the opposite with 0
             finalGraph[i].add(new Edge(i+numNodes, departureCapacities[i]));
-            finalGraph[i+numNodes].add(new Edge(i, 0));
+            finalGraph[i+numNodes].add(new Edge(i, 0)); // the opposite with 0
         }
-
         for (Pair p : edges) {
             finalGraph[p.getX() + numNodes].add(new Edge(p.getY(), Integer.MAX_VALUE));
-            finalGraph[p.getY()].add(new Edge(p.getX() + numNodes, 0));
+            finalGraph[p.getY()].add(new Edge(p.getX() + numNodes, 0)); // the opposite with 0
             finalGraph[p.getY() + numNodes].add(new Edge(p.getX(), Integer.MAX_VALUE));
-            finalGraph[p.getX()].add(new Edge(p.getY() + numNodes, 0));
+            finalGraph[p.getX()].add(new Edge(p.getY() + numNodes, 0)); // the opposite with 0
         }
         return finalGraph;
     }
 
-    private int edmondsKarp(List<Edge>[] network, int numNodes, int source, int sink) {
+    /**
+     * Edmonds–Karp algorithm implementation
+     */
+    private int edmondsKarp(List<Edge>[] network , int source, int sink) {
+        int numNodes = network.length;
         int[][] flow = new int[numNodes][numNodes];
         int[] via = new int[numNodes];
         int flowValue = 0;
         int increment;
-        while ( ( increment = findPath(network, numNodes, flow, source, sink, via) ) != 0 ) {
+        while ( ( increment = findPath(network, flow, source, sink, via) ) != 0 ) {
             flowValue += increment;
             // Update flow.
             int node = sink;
@@ -68,7 +75,11 @@ public class Problem {
         return flowValue;
     }
 
-    private int findPath(List<Edge>[] network, int numNodes, int[][] flow, int source, int sink, int[] via) {
+    /*
+     * Uses a breadth-first search (BFS) algorithm to find a path from the source node to the sink node in a network.
+     */
+    private int findPath(List<Edge>[] network, int[][] flow, int source, int sink, int[] via) {
+        int numNodes = network.length;
         Queue<Integer> waiting = new LinkedList<>();
         boolean[] found = new boolean[numNodes];
         int[] pathIncr = new int[numNodes];
@@ -76,7 +87,6 @@ public class Problem {
         found[source] = true;
         via[source] = source;
         pathIncr[source] = Integer.MAX_VALUE;
-
         do {
             int origin = waiting.remove();
             for (Edge e : network[origin]) {
